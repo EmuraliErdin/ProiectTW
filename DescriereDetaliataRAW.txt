@@ -1,0 +1,16 @@
+						Acordarea anonimă de note
+
+
+	In cadrul acestei aplicatii web urmarim sa construim un serviciu de acordare anonima a notelor unui proiect.
+
+	Un exemplu relevant ar fi cazul in care mai multe echipe se inscriu sa faca un anumit proiect, ele avand mai multe deadline-uri stabilite la inceput. La fiecare deadline va trebui incarcata pe platforma o parte noua a proiectului. La data ultimului deadline se vor forma comisiile alcatuite din studenti care vor urma sa jurizeze un proiect alocat comisiei respective. Studentii prezenti in comisii sunt alesi in mod aleatoriu si nu pot face parte din comisia care jurizeaza proiectul echipei proprii. Dupa ce comisia a acordat nota proiectului, profesorul are permisiunea de a vedea aceasta nota fara a sti insa cine face parte din comisia respectiva.
+
+	Baza de date va contine un total de cinci tabele reprezentand componentele descrise anterior, adica: Student, Profesor, Proiect, Comisie si 
+Echipa. Legaturile din cadrul acestei baze de date sunt:
+Profesor – Student, relatie 1:M - un profesor poate gestiona mai multi studenti
+Student – Echipa, relatie 1:1 - un student este alocat unei singure echipe
+Comisie – Student, relatie 1:M - o comisie este formata din mai multi studenti
+Echipa – Proiect, relatie 1:1 – o echipa realizeaza un singur proiect
+Proiect – Comisie, relatie 1:1 – un proiect este evaluat de o singura comisie
+
+
