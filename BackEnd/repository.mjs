@@ -31,6 +31,10 @@ const Student = sequelize.define('student', {
     password: {
         type: Sequelize.STRING,
         allowNull: false
+    },
+
+    grade: {
+        type:Sequelize.FLOAT
     }
 });
 
@@ -96,12 +100,24 @@ const Project = sequelize.define('project', {
 
     description:Sequelize.STRING,
 
-    // projectFile:{
-    //     type:Sequelize.file
-    // }
+    projectFile: Sequelize.STRING,
+
+    date:Sequelize.STRING
 
 });
 
+const Deadline = sequelize.define('deadline',{
+    id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        allowNull: false,
+        primaryKey: true
+    },
+
+    number:Sequelize.INTEGER,
+
+    date:Sequelize.STRING
+});
 
 const Jury = sequelize.define('jury', {
     id: {
@@ -109,7 +125,8 @@ const Jury = sequelize.define('jury', {
         defaultValue: Sequelize.UUIDV4,
         allowNull: false,
         primaryKey: true
-    },
+    }
+    
 });
 
 
@@ -117,6 +134,7 @@ const Jury = sequelize.define('jury', {
 Professor.hasMany(Student, {
     foreignKey: 'professorId'
 });
+
 Student.belongsTo(Professor, {
     foreignKey: 'professorId'
 });
@@ -124,6 +142,7 @@ Student.belongsTo(Professor, {
 Team.hasMany(Student, {
     foreignKey: 'teamId'
 });
+
 Student.belongsTo(Team, {
     foreignKey: 'teamId'
 });
@@ -131,28 +150,32 @@ Student.belongsTo(Team, {
 Jury.hasMany(Student, {
     foreignKey: 'juryId'
 });
+
 Student.belongsTo(Jury, {
     foreignKey: 'juryId'
 });
 
-Team.hasOne(Project, {
-    foreignKey: 'projectId'
-});
-Project.belongsTo(Team, {
-    foreignKey: 'juryId'
+Team.hasMany(Project, {
+    foreignKey: 'teamId'
 });
 
-Jury.hasOne(Project, {
-    foreignKey: 'juryId'
+Team.hasOne(Jury,{
+    foreignKey: 'teamId'
 });
-Project.belongsTo(Jury, {
-    foreignKey: 'juryId'
+
+Project.hasOne(Jury,{
+    foreignKey: 'projectId'
 });
+
 
 
 async function initialize() {
+    
+    
     await sequelize.authenticate();
+    console.log("AAAAAAAAAAAAAAA");
     await sequelize.sync({
+        //force:true,
         alter: true
     });
 }
@@ -163,5 +186,6 @@ export {
     Professor,
     Team,
     Jury,
-    Project
+    Project,
+    Deadline,
 }

@@ -1,11 +1,15 @@
-import express from 'express';
-import { Student, Professor, Team, Project, Jury } from './repository.mjs';
+import express, { request, response } from 'express';
+import { Student, Professor, Team, Project, Jury, Deadline } from './repository.mjs';
 import {
     getRecords, postRecord, deleteRecords,
-    getRecord, headRecord, deleteRecord, putRecord, patchRecord
+    getRecord, headRecord, deleteRecord, putRecord, patchRecord, 
+    getChildrenOfParent, postChildOfParent,
+    getChildOfParent, deleteChildOfParent, putChildOfParent, login,
+    getCurrentDate,postCurrentDate
 } from './service.mjs';
 
 const router = express.Router();
+
 
 router.route('/students')
     .get((request, response)=> getRecords(Student, request, response))
@@ -68,6 +72,41 @@ router.route('/professors')
     .head((request, response)=> headRecord(Jury, request, response))//verifica daca exista
     .put((request, response)=> putRecord(Jury, request, response))
     .patch((request, response)=> patchRecord(Jury, request, response))
-    .delete((request, response)=> deleteRecord(Jury, request, response))
+    .delete((request, response)=> deleteRecord(Jury, request, response));
+ 
+    router.route('/deadlines')
+    .get((request, response)=> getRecords(Deadline, request, response))
+    .post((request, response)=> postRecord(Deadline, request, response))
+    .delete((request, response)=> deleteRecords(Deadline, request, response))
+
+    router.route('/deadlines/:id')
+    .get((request, response)=> getRecord(Deadline, request, response))
+    .head((request, response)=> headRecord(Deadline, request, response))//verifica daca exista
+    .put((request, response)=> putRecord(Deadline, request, response))
+    .patch((request, response)=> patchRecord(Deadline, request, response))
+    .delete((request, response)=> deleteRecord(Deadline, request, response));
+   
+ 
+   router.route('/professors/:fid/students')
+   .get((request,response)=>getChildrenOfParent(Professor,'student',request,response))
+   .post((request,response)=>postChildOfParent(Professor,'professor',Student,request,response))
+
+   router.route('/teams/:fid/projects')
+   .get((request,response)=>getChildrenOfParent(Team,'project',request,response))
+   .post((request,response)=>postChildOfParent(Team,'team',Project,request,response))
+
+   router.route('/teams/:fid/jury')
+   .get((request,response)=>getChildrenOfParent(Team,'jury',request,response))
+
+   router.route('/juries/:fid/students')
+   .get((request,response)=>getChildrenOfParent(Jury,'student',request,response))
+   .post((request,response)=>postChildOfParent(Jury,'jury',Student,request,response))
+
+   router.route('/login')
+   .post((request, response)=> login(request,response))
+
+   router.route('/date')
+   .get((request,response)=>getCurrentDate(request,response))
+   .post((request,response)=>postCurrentDate(request,response))
 
     export default router;

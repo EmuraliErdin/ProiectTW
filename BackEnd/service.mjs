@@ -1,4 +1,9 @@
+import moment from "moment";
 import Sequelize from "sequelize";
+import {Deadline, Jury, Professor, Student, Team, Project} from "./repository.mjs"
+
+
+let currentDate='17.01.2022';
 
 function valid(Model, payload){
 console.warn(Object);
@@ -70,6 +75,7 @@ async function postRecord(Model, request, response){
         response.status(500).json(error);
     }
 }
+
 async function deleteRecords(Model, request, response){
     try{
         await Model.truncate();
@@ -149,8 +155,350 @@ async function patchRecord(Model, request, response){
     }
 }
 
+async function getChildrenOfParent(Parent,childModelName,request, response) {
+    try {
+
+        const parent = await Parent.findByPk(request.params.fid)// first id
+        if (parent) {   
+            let children = '';
+            switch(childModelName){
+                case 'student':
+                    children = await parent.getStudents();
+                    break;
+                case 'project':
+                    children = await parent.getProjects();
+                    break;
+                case 'jury':
+                    {
+                    children = await parent.getJury();
+                    break;
+                    }
+                case 'professor':
+                    children =  await parent.getProfessors();
+                    break;
+                case 'team':
+                    children = await parent.getTeams();
+            }
+
+            if(children!=='')
+            {
+                response.status(200).json(children);
+            }
+            else{
+                throw new err;
+            }
+
+        } else {
+            response.status(404).send();
+        }
+    } catch (err) {
+        console.warn(err);
+        response.status(500).send();
+    }
+}
+
+async function postChildOfParent(Parent, parentModelName, Child, request, response) {
+    try {
+
+        const parent = await Parent.findByPk(request.params.fid)// first id
+        if (parent) {   
+            let child = request.body;
+            switch(parentModelName){
+                case 'student':
+                    child.studentId=parent.id;
+                    break;
+                case 'project':
+                    child.projectId = parent.id;
+                    break;
+                case 'jury':
+                    child.juryId = parent.id;
+                case 'professor':
+                    child.professorId =  parent.id;
+                    break;
+                case 'team':
+                    child.teamId = parent.id;
+            }
+            await Child.create(child);
+            response.status(201).json(child);
+        } else {
+            response.status(404).send();
+        }
+    } catch (err) {
+        console.warn(err);
+        response.status(500).send();
+    }
+}
+
+async function getChildOfParent(Parent, childModelName,request,response)
+{
+    try {
+        
+        const parent = await Parent.findByPk(request.params.fid)// first id
+        if (parent) {   
+            let children = '';
+            switch(childModelName){
+                case 'student':
+                    children = await parent.getStudents({where: {id:request.params.sid}});
+                    break;
+                case 'project':
+                    children = await parent.getProjects({where: {id:request.params.sid}});
+                    break;
+                case 'jury':
+                    children = await parent.getJury({where: {id:request.params.sid}});
+                case 'professor':
+                    children =  await parent.getProfessors({where: {id:request.params.sid}});
+                    break;
+                case 'team':
+                    children = await parent.getTeams({where: {id:request.params.sid}});
+            }
+            
+            const child = children.shift();
+
+            if(child!=='')
+            {
+                response.status(200).json(child);
+            }
+            else{
+                throw new err;
+            }
+
+        } else {
+            response.status(404).send();
+        }
+    } catch (err) {
+        console.warn(err);
+        response.status(500).send();
+    }
+}
+
+async function deleteChildOfParent(Parent, childModelName,request,response)
+{
+    try {
+        
+        const parent = await Parent.findByPk(request.params.fid)// first id
+        if (parent) {   
+            let children = '';
+            switch(childModelName){
+                case 'student':
+                    children = await parent.getStudents({where: {id:request.params.sid}});
+                    break;
+                case 'project':
+                    children = await parent.getProjects({where: {id:request.params.sid}});
+                    break;
+                case 'jury':
+                    children = await parent.getJurys({where: {id:request.params.sid}});
+                case 'professor':
+                    children =  await parent.getProfessors({where: {id:request.params.sid}});
+                    break;
+                case 'team':
+                    children = await parent.getTeams({where: {id:request.params.sid}});
+            }
+
+            const child = children.shift()
+
+            if(child){
+                await child.destroy(request.body)
+                response.status(202).json({message:'accepted'})
+            }else{
+                response.status(404).json({message:'Child record not found.'})
+
+            }
+
+        } else {
+            response.status(404).send();
+        }
+    } catch (err) {
+        console.warn(err);
+        response.status(500).send();
+    }
+}
+
+async function putChildOfParent(Parent, childModelName,request,response)
+{
+    try {
+        
+        const parent = await Parent.findByPk(request.params.fid)// first id
+        if (parent) {   
+            let children = '';
+            switch(childModelName){
+                case 'student':
+                    children = await parent.getStudents({where: {id:request.params.sid}});
+                    break;
+                case 'project':
+                    children = await parent.getProjects({where: {id:request.params.sid}});
+                    break;
+                case 'jury':
+                    children = await parent.getJurys({where: {id:request.params.sid}});
+                case 'professor':
+                    children =  await parent.getProfessors({where: {id:request.params.sid}});
+                    break;
+                case 'team':
+                    children = await parent.getTeams({where: {id:request.params.sid}});
+            }
+
+            const child = children.shift()
+
+            if(child){
+                await child.update(request.body)
+                response.status(202).json({message:'accepted'})
+            }else{
+                response.status(404).json({message:'Child record not found.'})
+
+            }
+
+        } else {
+            response.status(404).send();
+        }
+    } catch (err) {
+        console.warn(err);
+        response.status(500).send();
+    }
+}
+
+async function login(request, response)
+{
+    const loginInfo = request.body;
+    console.log(loginInfo);
+
+    const student  = await Student.findOne({where:{email:loginInfo.name}})
+    console.log(student);
+    if(student)
+    {
+        response.status(200).json(student);
+    
+    }
+    else
+    {
+        const professor = await Professor.findOne({where:{email:loginInfo.name}})
+        if(professor)
+        {
+            response.status(200).json(professor);
+        }
+        else
+        {
+            response.status(404).json({message:"Not found"});
+        }
+    }
+}
+
+async function postCurrentDate(request,response)
+{
+    let date = request.body.date;
+
+    try{
+        currentDate = date;
+    }
+    catch(e)
+    {
+        response.status(400).send();
+        return;
+    }
+
+    
+    
+    let deadlines = await Deadline.findAll({
+        attributes: attributes(request),
+        where: where(request)
+    });
+
+    for(let i = 0;i<deadlines.length;i++)
+    {
+        if(currentDate==deadlines[i].dataValues.date && deadlines[i].dataValues.number == 3)
+        {
+            formJuries();
+        }
+        
+        
+        if(deadlines[i].dataValues.number ==3 && moment(deadlines[i].dataValues.date,"DD.MM.YYYY").dayOfYear()+2 == moment(currentDate,"DD.MM.YYYY").dayOfYear())
+        {
+            console.log(moment(deadlines[i].dataValues.date,"DD.MM.YYYY").dayOfYear()+2 + "   " + moment(currentDate,"DD.MM.YYYY").dayOfYear());
+            Jury.truncate();
+            Deadline.truncate();
+            Project.truncate();
+        }
+    }
+
+    response.status(200).send();
+}
+
+async function formJuries()
+{
+    const teams = await Team.findAll();
+    const students = await Student.findAll();
+
+    let values = new Array(teams.length);
+    for(let j=0;j<teams.length;j++)
+    {
+        values[j]=0;
+    }
+
+    for(let i = 0;i<students.length;i++)
+    {
+        for(let j=0;j<teams.length;j++)
+        {
+            if(students[i].dataValues.teamId === teams[j].dataValues.id)
+            {
+                values[j]++;
+            }
+            
+        }
+    }
+
+    let min = Math.min.apply(Math, values);
+
+    teams.forEach(async team => {
+        let jury =  formJuryforTeam(team.dataValues,students,min);
+        if(jury!==[])
+        {
+
+            let jurySQL =  await Jury.create({teamId:team.dataValues.id});
+            for(let i=0;i<jury.length;i++)
+            {
+                let student = await Student.findByPk(jury[i].id);
+                student['juryId'] = jurySQL.dataValues.id;
+                await student.save();
+            }
+        }
+    });
+}
+
+function formJuryforTeam(team, students, min)
+{
+    let studentiEligibili = [];
+    //determinare studenti eligibili
+    students.forEach(student => {
+        
+        if(student.dataValues.teamId != team.id && student.dataValues.juryId==null && student.dataValues.teamId!=null)
+        {
+            studentiEligibili.push(student);
+        }
+    });
+
+    let jury = [];
+    // if(min>=3)
+    // {
+        for(let i=0;i<min;i++)
+        {
+            let position = Math.floor(Math.random() * (studentiEligibili.length-1));
+            let stud = studentiEligibili.splice(position,1);
+            jury.push(stud[0].dataValues)
+        }
+        
+    //}
+    
+    return jury;
+
+}
+
+function getCurrentDate(request,response)
+{
+  response.status(200).json({date:currentDate});   
+}
+
 
 export {
     getRecords, postRecord, deleteRecords,
-    getRecord, headRecord, deleteRecord, putRecord, patchRecord
+    getRecord, headRecord, deleteRecord, putRecord, patchRecord, 
+    getChildrenOfParent, postChildOfParent,
+    getChildOfParent, deleteChildOfParent, putChildOfParent, login, getCurrentDate, postCurrentDate
 }
