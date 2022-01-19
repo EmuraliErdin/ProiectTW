@@ -173,7 +173,6 @@ async function initialize() {
     
     
     await sequelize.authenticate();
-    console.log("AAAAAAAAAAAAAAA");
     await sequelize.sync({
         //force:true,
         alter: true
